@@ -1,0 +1,35 @@
+# 🔹 Virtual Environment
+venv/
+env/
+ENV/
+
+# 🔹 Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# 🔹 OS files
+.DS_Store
+Thumbs.db
+
+# 🔹 Environment variables
+.env
+
+# 🔹 IDE / Editor
+.vscode/
+.idea/
+
+# 🔹 Logs
+*.log
+
+# 🔹 Build files
+dist/
+build/
+*.egg-info/
+
+# 🔹 Output files (your generated job files)
+output/
+
+# 🔹 Database (if you ever use again)
+*.db
