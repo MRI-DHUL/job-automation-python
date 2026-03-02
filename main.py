@@ -1,122 +1,105 @@
-from jobs.providers.remoteok import fetch_remoteok_jobs
-from jobs.providers.remotive import fetch_remotive_jobs
-from jobs.aggregator import fetch_all_jobs
 from utils.validator import is_valid_email
 from utils.input_handler import get_input_with_attempts
 
-import os
-from datetime import datetime
+from services.job_service import (
+    get_provider_choice,
+    fetch_jobs,
+    apply_filters
+)
+
+from services.file_service import save_jobs
+from services.cli_menu import show_main_menu, show_fetch_menu
 
 
-def get_next_file_number(folder):
-    files = os.listdir(folder)
-
-    numbers = []
-    for file in files:
-        if file.startswith("Job") and "_" in file:
-            try:
-                num = int(file.split("_")[0].replace("Job", ""))
-                numbers.append(num)
-            except:
-                pass
-
-    return max(numbers, default=0) + 1
-
-
-# Provider validation
-def validate_provider(choice):
-    return choice in ["remoteok", "remotive", "all"]
-
-
-if __name__ == "__main__":
+def main():
     print("=== JOB AUTOMATION TOOL ===\n")
 
-    # Email validation (3 attempts)
+    # 🔹 Email validation
     email = get_input_with_attempts(
         "Enter your email: ",
         validate_fn=is_valid_email,
-        error_msg="Invalid email format"
+        error_msg="Invalid email"
     )
+    print("✅ Email validated\n")
 
-    print("Email validated\n")
-
-    # Provider selection (3 attempts)
-    choice = get_input_with_attempts(
-        "Select provider (remoteok / remotive / all): ",
-        validate_fn=validate_provider,
-        error_msg="Invalid provider"
-    ).lower()
-
-    # Fetch jobs
-    match choice:
-        case "remoteok":
-            jobs = fetch_remoteok_jobs()
-        case "remotive":
-            jobs = fetch_remotive_jobs()
-        case "all":
-            jobs = fetch_all_jobs()
-
-    # Filters (no strict validation)
-    keyword = input("Enter job keyword (or press Enter to skip): ").lower().strip()
-    location_filter = input("Enter location (or press Enter to skip): ").lower().strip()
-    company_filter = input("Enter company name (or press Enter to skip): ").lower().strip()
-    source_filter = input("Enter source (remoteok/remotive or press Enter to skip): ").lower().strip()
-
+    jobs = []
     filtered_jobs = []
+    filters_applied = False
 
-    for job in jobs:
-        title = job["title"].lower()
-        location = (job["location"] or "").lower()
-        company = job["company"].lower()
-        source = job["source"].lower()
+    while True:
+        show_main_menu()
+        choice = input("Select option: ").strip()
 
-        if keyword and keyword not in title:
-            continue
+        if choice == "1":
 
-        if location_filter and location_filter not in location:
-            continue
+            print("\nFetching jobs from all providers...\n")
 
-        if company_filter and company_filter not in company:
-            continue
+            jobs = fetch_jobs("all")
+            filtered_jobs = []
+            filters_applied = False
 
-        if source_filter and source_filter != source:
-            continue
+            print(f"✅ Fetched {len(jobs)} jobs.\n")
 
-        filtered_jobs.append(job)
+            while True:
+                show_fetch_menu(len(jobs), len(filtered_jobs))
+                sub_choice = input("Select option: ").strip()
 
-    jobs = filtered_jobs
+                # 🔹 Select provider
+                if sub_choice == "1":
+                    provider = get_provider_choice(get_input_with_attempts)
 
-    print(f"\nFiltered Jobs: {len(jobs)}\n")
+                    print(f"\nFetching jobs from {provider}...\n")
 
-    if not jobs:
-        print("No jobs found with given filters. No file created.")
-        exit()
-        
-    # Ensure output folder
-    os.makedirs("output", exist_ok=True)
+                    jobs = fetch_jobs(provider)
 
-    timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-    file_number = get_next_file_number("output")
+                    filtered_jobs = []
+                    filters_applied = False
 
-    file_name = f"Job{file_number}_{timestamp}.txt"
-    file_path = os.path.join("output", file_name)
+                    print(f"✅ Fetched {len(jobs)} jobs.\n")
 
-    # Save to file
-    with open(file_path, "w", encoding="utf-8") as f:
-        for i, job in enumerate(jobs, start=1):
-            location = job['location'] or "Not specified"
+                # 🔹 Apply filters
+                elif sub_choice == "2":
+                    if not jobs:
+                        print("⚠ Fetch jobs first.")
+                        continue
 
-            job_text = (
-                f"Job {i}\n\n"
-                f"Title     : {job['title']}\n"
-                f"Company   : {job['company']}\n"
-                f"Location  : {location}\n"
-                f"Apply Link: {job['url']}\n"
-                f"Source    : {job['source']}\n"
-                f"{'-'*50}\n"
-            )
+                    filtered_jobs = apply_filters(jobs)
+                    filters_applied = True 
 
-            print(job_text)
-            f.write(job_text)
+                    print(f"\nFiltered Jobs: {len(filtered_jobs)}\n")
 
-    print(f"\nJobs saved to {file_path}")
+                # 🔹 Save results
+                elif sub_choice == "3":
+                    success, message = save_jobs(
+                        jobs,
+                        filtered_jobs,
+                        filters_applied
+                    )
+
+                    if not success:
+                        print(f"⚠ {message}")
+                    else:
+                        print(f"✅ {message}")
+
+                # 🔹 Back
+                elif sub_choice == "4":
+                    break
+
+                # 🔹 Exit
+                elif sub_choice == "5":
+                    print("Exiting... Goodbye!")
+                    return
+                
+                else:
+                    print("Invalid option.")
+
+        elif choice == "2":
+            print("Exiting... Goodbye!")
+            break
+
+        else:
+            print("Invalid option.")
+
+
+if __name__ == "__main__":
+    main()

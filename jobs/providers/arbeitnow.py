@@ -1,7 +1,7 @@
 import requests
 
-def fetch_remotive_jobs():
-    url = "https://remotive.com/api/remote-jobs"
+def fetch_arbeitnow_jobs():
+    url = "https://www.arbeitnow.com/api/job-board-api"
 
     response = requests.get(url)
 
@@ -12,13 +12,13 @@ def fetch_remotive_jobs():
 
     jobs = []
 
-    for job in data["jobs"]:
+    for job in data.get("data", []):
         jobs.append({
             "title": job.get("title"),
             "company": job.get("company_name"),
-            "location": job.get("candidate_required_location"),
+            "location": job.get("location"),
             "url": job.get("url"),
-            "source": "Remotive"
+            "source": "Arbeitnow"
         })
 
     return jobs

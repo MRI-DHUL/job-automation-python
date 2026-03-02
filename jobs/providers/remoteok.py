@@ -17,7 +17,7 @@ def fetch_remoteok_jobs():
 
     jobs = []
 
-    for job in data[1:11]:
+    for job in data[1:]:
         jobs.append({
             "title": job.get("position"),
             "company": job.get("company"),
