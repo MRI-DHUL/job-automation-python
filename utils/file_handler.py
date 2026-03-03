@@ -28,7 +28,7 @@ def generate_file_paths():
     )
 
 
-def save_txt(path, jobs):
+def save_txt(path, jobs, email):
     with open(path, "w", encoding="utf-8") as f:
         for i, job in enumerate(jobs, 1):
             text = (
@@ -38,6 +38,7 @@ def save_txt(path, jobs):
                 f"Location  : {job['location'] or 'Not specified'}\n"
                 f"Apply Link: {job['url']}\n"
                 f"Source    : {job['source']}\n"
+                f"Saved For : {email}\n"
                 f"{'-'*50}\n"
             )
             # print(text)

@@ -1,5 +1,9 @@
-import re
+from email_validator import validate_email, EmailNotValidError
 
-def is_valid_email(email):
-    pattern = r'^[\w\.-]+@[\w\.-]+\.com$'
-    return re.match(pattern, email) is not None
+
+def validate_and_normalize_email(email: str):
+    try:
+        valid = validate_email(email)
+        return True, valid.email
+    except EmailNotValidError as e:
+        return False, str(e)

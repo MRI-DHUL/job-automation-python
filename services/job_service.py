@@ -49,10 +49,19 @@ def fetch_jobs(choice):
 
 
 def apply_filters(jobs):
-    keyword = input("Enter job keyword (or press Enter to skip): ").lower().strip()
-    location_filter = input("Enter location (or press Enter to skip): ").lower().strip()
-    company_filter = input("Enter company name (or press Enter to skip): ").lower().strip()
-    source_filter = input("Enter source (remoteok/remotive/arbeitnow or press Enter to skip): ").lower().strip()
+    keyword_input = input("Enter job keywords (or press Enter to skip): ").lower().strip()
+    location_input = input("Enter locations (or press Enter to skip): ").lower().strip()
+    company_input = input("Enter company names (or press Enter to skip): ").lower().strip()
+    source_input = input("Enter sources (remoteok/remotive/arbeitnow or press Enter to skip): ").lower().strip()
+
+    # Convert all inputs into lists
+    def split_values(value):
+        return [v.strip() for v in value.split(",") if v.strip()] if value else []
+
+    keywords = split_values(keyword_input)
+    locations = split_values(location_input)
+    companies = split_values(company_input)
+    sources = split_values(source_input)
 
     filtered = []
 
@@ -62,13 +71,13 @@ def apply_filters(jobs):
         company = job["company"].lower()
         source = job["source"].lower()
 
-        if keyword and keyword not in title:
+        if keywords and not any(k in title for k in keywords):
             continue
-        if location_filter and location_filter not in location:
+        if locations and not any(l in location for l in locations):
             continue
-        if company_filter and company_filter not in company:
+        if companies and not any(c in company for c in companies):
             continue
-        if source_filter and source_filter != source:
+        if sources and not any(s == source for s in sources):
             continue
 
         filtered.append(job)
