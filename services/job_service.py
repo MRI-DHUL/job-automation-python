@@ -5,18 +5,98 @@ from jobs.aggregator import fetch_all_jobs
 
 from utils.deduplicator import remove_duplicate_jobs
 
-
-PROVIDER_MAP = {
-    "1": "remoteok",
-    "2": "remotive",
-    "3": "arbeitnow",
-    "4": "all"
+VALID_PROVIDERS = {
+    "remoteok",
+    "remotive",
+    "arbeitnow",
+    "all"
 }
 
+def validate_provider(provider):
+    """Ensure provider is valid."""
+    if provider not in VALID_PROVIDERS:
+        raise ValueError(f"Invalid provider: {provider}")
+    return True
 
-def validate_provider(choice):
-    return choice in PROVIDER_MAP
+def fetch_jobs(provider):
 
+    validate_provider(provider)
+
+    match provider:
+
+        case "remoteok":
+            jobs = fetch_remoteok_jobs()
+
+        case "remotive":
+            jobs = fetch_remotive_jobs()
+
+        case "arbeitnow":
+            jobs = fetch_arbeitnow_jobs()
+
+        case "all":
+            jobs = fetch_all_jobs()
+
+        case _:
+            jobs = []
+
+    return remove_duplicate_jobs(jobs)
+
+def apply_filters(jobs, filters):
+
+    keywords = filters.get("keywords", [])
+    locations = filters.get("locations", [])
+    companies = filters.get("companies", [])
+    sources = filters.get("sources", [])
+    job_types = filters.get("job_types", [])
+    remote_only = filters.get("remote_only", False)
+    salary_min = filters.get("salary_min", 0)
+
+    filtered = []
+
+    for job in jobs:
+
+        title = job.get("title", "").lower()
+        location = (job.get("location") or "").lower()
+        company = job.get("company", "").lower()
+        source = job.get("source", "").lower()
+        job_type = (job.get("job_type") or "").lower()
+        salary = job.get("salary", 0)
+
+        if keywords and not any(k in title for k in keywords):
+            continue
+
+        if locations and not any(l in location for l in locations):
+            continue
+
+        if companies and not any(c in company for c in companies):
+            continue
+
+        if sources and source not in sources:
+            continue
+
+        if job_types and job_type not in job_types:
+            continue
+
+        if remote_only and "remote" not in location:
+            continue
+
+        if salary_min and salary and salary < salary_min:
+            continue
+
+        filtered.append(job)
+
+    return filtered
+
+def search_jobs(filters):
+    """Main entry point for UI."""
+
+    provider = filters.get("provider", "all")
+
+    jobs = fetch_jobs(provider)
+
+    filtered_jobs = apply_filters(jobs, filters)
+
+    return filtered_jobs
 
 def get_provider_choice(input_handler):
     print("Select provider:")
@@ -32,54 +112,3 @@ def get_provider_choice(input_handler):
     )
 
     return PROVIDER_MAP[choice_input]
-
-
-def fetch_jobs(choice):
-    match choice:
-        case "remoteok":
-            jobs = fetch_remoteok_jobs()
-        case "remotive":
-            jobs = fetch_remotive_jobs()
-        case "arbeitnow":
-            jobs = fetch_arbeitnow_jobs()
-        case "all":
-            jobs = fetch_all_jobs()
-
-    return remove_duplicate_jobs(jobs)
-
-
-def apply_filters(jobs):
-    keyword_input = input("Enter job keywords (or press Enter to skip): ").lower().strip()
-    location_input = input("Enter locations (or press Enter to skip): ").lower().strip()
-    company_input = input("Enter company names (or press Enter to skip): ").lower().strip()
-    source_input = input("Enter sources (remoteok/remotive/arbeitnow or press Enter to skip): ").lower().strip()
-
-    # Convert all inputs into lists
-    def split_values(value):
-        return [v.strip() for v in value.split(",") if v.strip()] if value else []
-
-    keywords = split_values(keyword_input)
-    locations = split_values(location_input)
-    companies = split_values(company_input)
-    sources = split_values(source_input)
-
-    filtered = []
-
-    for job in jobs:
-        title = job["title"].lower()
-        location = (job["location"] or "").lower()
-        company = job["company"].lower()
-        source = job["source"].lower()
-
-        if keywords and not any(k in title for k in keywords):
-            continue
-        if locations and not any(l in location for l in locations):
-            continue
-        if companies and not any(c in company for c in companies):
-            continue
-        if sources and not any(s == source for s in sources):
-            continue
-
-        filtered.append(job)
-
-    return filtered

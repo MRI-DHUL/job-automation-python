@@ -11,6 +11,30 @@ from services.file_service import save_jobs
 from services.cli_menu import show_main_menu, show_fetch_menu
 
 
+def build_cli_filters():
+    """Collect filters from CLI and return filter dictionary."""
+
+    keyword_input = input("Enter job keywords (comma separated or press Enter to skip): ").lower().strip()
+    location_input = input("Enter locations (comma separated or press Enter to skip): ").lower().strip()
+    company_input = input("Enter companies (comma separated or press Enter to skip): ").lower().strip()
+    source_input = input("Enter sources (remoteok/remotive/arbeitnow or press Enter to skip): ").lower().strip()
+
+    def split_values(value):
+        return [v.strip() for v in value.split(",") if v.strip()] if value else []
+
+    filters = {
+        "keywords": split_values(keyword_input),
+        "locations": split_values(location_input),
+        "companies": split_values(company_input),
+        "sources": split_values(source_input),
+        "job_types": [],
+        "remote_only": False,
+        "salary_min": 0
+    }
+
+    return filters
+
+
 def main():
     print("=== JOB AUTOMATION TOOL ===\n")
 
@@ -64,7 +88,10 @@ def main():
                         print("⚠ Fetch jobs first.")
                         continue
 
-                    filtered_jobs = apply_filters(jobs)
+                    filters = build_cli_filters()
+
+                    filtered_jobs = apply_filters(jobs, filters)
+
                     filters_applied = True
 
                     print(f"\nFiltered Jobs: {len(filtered_jobs)}\n")
@@ -91,7 +118,7 @@ def main():
                 elif sub_choice == "5":
                     print("Exiting... Goodbye!")
                     return
-                
+
                 else:
                     print("Invalid option.")
 
