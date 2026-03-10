@@ -1,0 +1,93 @@
+<section class="results">
+
+    <!-- Loading -->
+    <div id="loading" class="loading hidden">
+        <div class="spinner"></div>
+        <div>Fetching jobs… Please wait</div>
+    </div>
+
+    <!-- Idle State -->
+    {% if status == "Idle" %}
+    <div id="idle-msg" class="empty">
+        Click "Search Jobs" to fetch jobs
+    </div>
+    {% endif %}
+
+    <!-- Results -->
+    <div id="results-content">
+        {% if jobs %}
+        <div class="count">Jobs Found: {{ jobs|length }}</div>
+
+        {% for job in jobs %}
+        <div class="job-card">
+
+            <!-- Title -->
+            <h3 class="job-title">{{ job.position or "-" }}</h3>
+
+            <!-- Top Info Grid -->
+            <div class="info-grid">
+                <div><span class="label">Company</span>{{ job.company or "-" }}</div>
+                <div><span class="label">Location</span>{{ job.location or "-" }}</div>
+                <div>
+                    <span class="label">Work Mode</span>
+                    {% if job.location and "remote" in job.location|lower %}
+                    Remote
+                    {% else %}
+                    Onsite / Hybrid
+                    {% endif %}
+                </div>
+                <div><span class="label">Job Type</span>{{ job.job_type or "-" }}</div>
+
+                <div>
+                    <span class="label">Salary</span>
+                    {% if job.salary_min or job.salary_max %}
+                    {{ job.salary_min or "-" }} - {{ job.salary_max or "-" }}
+                    {% elif job.salary %}
+                    {{ job.salary }}
+                    {% else %}
+                    -
+                    {% endif %}
+                </div>
+
+                <div><span class="label">Source</span>{{ job.source or "-" }}</div>
+
+                <div><span class="label">Posted</span>
+                    {{ job.posted or job.created_at or job.date or "-" }}
+                </div>
+            </div>
+
+            <!-- Tags -->
+            <div class="tags-row">
+                <span class="label">Tags</span>
+                {% if job.tags %}
+                {% for tag in job.tags[:6] %}
+                <span class="tag">{{ tag }}</span>
+                {% endfor %}
+                {% else %}
+                -
+                {% endif %}
+            </div>
+
+            <!-- Description -->
+            <div class="desc">
+                {{ job.description[:240] ~ "..." if job.description else "-" }}
+            </div>
+
+            <!-- Apply -->
+            <div class="apply-row">
+                {% if job.url %}
+                <a class="apply-btn" href="{{ job.url }}" target="_blank">Apply Now</a>
+                {% else %}
+                -
+                {% endif %}
+            </div>
+
+        </div>
+        {% endfor %}
+
+        {% elif status != "Idle" %}
+        <!-- No Results -->
+        <div class="empty">No jobs found. Search again.</div>
+        {% endif %}
+    </div>
+</section>

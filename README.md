@@ -94,7 +94,7 @@ python main.py
 ```bash
 Job 1
 
-Title     : DevOps Engineer
+Position  : DevOps Engineer
 Company   : XYZ
 Location  : Remote
 Apply Link: https://...

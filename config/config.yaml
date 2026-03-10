@@ -1,0 +1,16 @@
+providers:
+  - remoteok
+  - remotive
+  - arbeitnow
+
+filters:
+  keywords: ["python", "backend"]
+  locations: ["remote"]
+  companies: []
+  sources: []
+  job_types: []
+  remote_only: false
+  salary_min: 0
+
+output:
+  save_to_file: true
