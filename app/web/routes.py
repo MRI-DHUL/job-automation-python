@@ -9,10 +9,10 @@ ALL_PROVIDERS = ["remoteok", "remotive", "arbeitnow"]
 @app.route("/", methods=["GET", "POST"])
 def dashboard():
     jobs = []
-    status = "Idle"   # 🟢 default
+    status = "Idle"
 
     if request.method == "POST":
-        status = "Connected"  # 🟢 will show after fetch completes
+        status = "Connected"
 
         filters = {
             "keywords": [k.strip() for k in request.form.get("keywords", "").split(",") if k.strip()],

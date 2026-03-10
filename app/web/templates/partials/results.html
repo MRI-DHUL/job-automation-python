@@ -1,19 +1,16 @@
 <section class="results">
 
-    <!-- Loading -->
     <div id="loading" class="loading hidden">
         <div class="spinner"></div>
         <div>Fetching jobs… Please wait</div>
     </div>
 
-    <!-- Idle State -->
     {% if status == "Idle" %}
     <div id="idle-msg" class="empty">
         Click "Search Jobs" to fetch jobs
     </div>
     {% endif %}
 
-    <!-- Results -->
     <div id="results-content">
         {% if jobs %}
         <div class="count">Jobs Found: {{ jobs|length }}</div>
@@ -21,10 +18,8 @@
         {% for job in jobs %}
         <div class="job-card">
 
-            <!-- Title -->
             <h3 class="job-title">{{ job.position or "-" }}</h3>
 
-            <!-- Top Info Grid -->
             <div class="info-grid">
                 <div><span class="label">Company</span>{{ job.company or "-" }}</div>
                 <div><span class="label">Location</span>{{ job.location or "-" }}</div>
@@ -56,7 +51,6 @@
                 </div>
             </div>
 
-            <!-- Tags -->
             <div class="tags-row">
                 <span class="label">Tags</span>
                 {% if job.tags %}
@@ -68,12 +62,10 @@
                 {% endif %}
             </div>
 
-            <!-- Description -->
             <div class="desc">
                 {{ job.description[:240] ~ "..." if job.description else "-" }}
             </div>
 
-            <!-- Apply -->
             <div class="apply-row">
                 {% if job.url %}
                 <a class="apply-btn" href="{{ job.url }}" target="_blank">Apply Now</a>
@@ -86,7 +78,7 @@
         {% endfor %}
 
         {% elif status != "Idle" %}
-        <!-- No Results -->
+
         <div class="empty">No jobs found. Search again.</div>
         {% endif %}
     </div>
