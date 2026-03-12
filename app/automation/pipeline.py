@@ -1,5 +1,5 @@
 from app.utils.config_loader import load_config
-from app.jobs.aggregator import fetch_all_jobs
+from app.providers.aggregator import fetch_all_jobs
 from app.services.job_service import apply_filters
 from app.services.deduplicator import remove_duplicate_jobs
 from app.services.file_service import save_jobs
