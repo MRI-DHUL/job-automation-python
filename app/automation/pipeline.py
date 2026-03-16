@@ -1,4 +1,4 @@
-from app.utils.config_loader import load_config
+from app.core.config import load_config
 from app.providers.aggregator import fetch_all_jobs
 from app.services.job_service import apply_filters
 from app.services.deduplicator import remove_duplicate_jobs
